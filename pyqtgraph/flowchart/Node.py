@@ -462,8 +462,8 @@ class NodeGraphicsItem(GraphicsObject):
         self.setFlags(flags)
         self.bounds = QtCore.QRectF(0, 0, 100, 100)
         self.nameItem = QtGui.QGraphicsTextItem(self.node.name(), self)
-        self.nameItem.setDefaultTextColor(QtGui.QColor(50, 50, 50))
-        self.nameItem.moveBy(self.bounds.width()/2. - self.nameItem.boundingRect().width()/2., 0)
+        self.nameItem.setDefaultTextColor(QtGui.QColor(222, 222, 222))
+        self.nameItem.moveBy(self.bounds.width()/2. - self.nameItem.boundingRect().width()/2., -20)
         self.nameItem.setTextInteractionFlags(QtCore.Qt.TextEditorInteraction)
         self.updateTerminals()
         #self.setZValue(10)
@@ -498,7 +498,7 @@ class NodeGraphicsItem(GraphicsObject):
             
         ### re-center the label
         bounds = self.boundingRect()
-        self.nameItem.setPos(bounds.width()/2. - self.nameItem.boundingRect().width()/2., 0)
+        self.nameItem.setPos(bounds.width()/2. - self.nameItem.boundingRect().width()/2., -20)
 
     def setPen(self, *args, **kwargs):
         self.pen = fn.mkPen(*args, **kwargs)
@@ -510,9 +510,14 @@ class NodeGraphicsItem(GraphicsObject):
         
         
     def updateTerminals(self):
+        inp = self.node.inputs()
+        out = self.node.outputs()
+        n = max(len(inp), len(out))
+        n = max(3, n)
+        self.bounds = QtCore.QRectF(0, 0, 150, n*15)
         bounds = self.bounds
         self.terminals = {}
-        inp = self.node.inputs()
+        
         dy = bounds.height() / (len(inp)+1)
         y = dy
         for i, t in inp.items():
@@ -524,7 +529,6 @@ class NodeGraphicsItem(GraphicsObject):
             self.terminals[i] = (t, item)
             y += dy
         
-        out = self.node.outputs()
         dy = bounds.height() / (len(out)+1)
         y = dy
         for i, t in out.items():
