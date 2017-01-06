@@ -456,7 +456,7 @@ class ConnectionItem(GraphicsObject):
         self.path = None
         self.shapePath = None
         self.style = {
-            'shape': 'line',
+            'shape': 'cubic',
             'color': (100, 100, 250),
             'width': 1.0,
             'hoverColor': (150, 150, 250),
@@ -493,17 +493,23 @@ class ConnectionItem(GraphicsObject):
             return
         self.prepareGeometryChange()
         
-        self.path = self.generatePath(start, stop)
+        forward = self.source.term.isOutput()
+        self.path = self.generatePath(start, stop, forward)
         self.shapePath = None
         self.update()
         
-    def generatePath(self, start, stop):
+    def generatePath(self, start, stop, forward):
         path = QtGui.QPainterPath()
         path.moveTo(start)
         if self.style['shape'] == 'line':
             path.lineTo(stop)
         elif self.style['shape'] == 'cubic':
-            path.cubicTo(Point(stop.x(), start.y()), Point(start.x(), stop.y()), Point(stop.x(), stop.y()))
+            dx = 50.0
+            if not forward:
+                dx = -50.0
+            if stop.x() < start.x():
+                dx *= 3
+            path.cubicTo(Point(start.x()+dx, start.y()), Point(stop.x()-dx, stop.y()), Point(stop.x(), stop.y()))
         else:
             raise Exception('Invalid shape "%s"; options are "line" or "cubic"' % self.style['shape'])
         return path
