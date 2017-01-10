@@ -83,7 +83,7 @@ class Flowchart(Node):
       
     def setLibrary(self, lib):
         self.library = lib
-        self.widget().chartWidget.buildMenu()
+        self.widget().buildMenu()
       
     def setInput(self, **args):
         """Set the input values of the flowchart. This will automatically propagate
@@ -98,7 +98,6 @@ class Flowchart(Node):
     def outputChanged(self):
         ## called when output of internal node has changed
         vals = self.outputNode.inputValues()
-        self.widget().outputChanged(vals)
         self.setOutput(**vals)
         #self.sigOutputChanged.emit(self)
         
@@ -189,7 +188,6 @@ class Flowchart(Node):
         self.viewBox.addItem(item)
         item.moveBy(*pos)
         self._nodes[name] = node
-        self.widget().addNode(node) 
         node.sigClosed.connect(self.nodeClosed)
         node.sigRenamed.connect(self.nodeRenamed)
         node.sigOutputChanged.connect(self.nodeOutputChanged)
@@ -200,7 +198,6 @@ class Flowchart(Node):
         
     def nodeClosed(self, node):
         del self._nodes[node.name()]
-        self.widget().removeNode(node)
         for signal in ['sigClosed', 'sigRenamed', 'sigOutputChanged']:
             try:
                 getattr(node, signal).disconnect(self.nodeClosed)
@@ -211,7 +208,6 @@ class Flowchart(Node):
     def nodeRenamed(self, node, oldName):
         del self._nodes[oldName]
         self._nodes[node.name()] = node
-        self.widget().nodeRenamed(node, oldName)
         self.sigChartChanged.emit(self, 'rename', node)
         
     def arrangeNodes(self):
@@ -415,9 +411,9 @@ class Flowchart(Node):
         
     def widget(self):
         if self._widget is None:
-            self._widget = FlowchartCtrlWidget(self)
-            self.scene = self._widget.scene()
-            self.viewBox = self._widget.viewBox()
+            self._widget = FlowchartWidget(self)
+            self.scene = self._widget._scene
+            self.viewBox = self._widget._viewBox
             #self._scene = QtGui.QGraphicsScene()
             #self._widget.setScene(self._scene)
             #self.scene.addItem(self.chartGraphicsItem())
@@ -761,11 +757,10 @@ class FlowchartCtrlWidget(QtGui.QWidget):
 
 class FlowchartWidget(dockarea.DockArea):
     """Includes the actual graphical flowchart and debugging interface"""
-    def __init__(self, chart, ctrl):
+    def __init__(self, chart):
         #QtGui.QWidget.__init__(self)
         dockarea.DockArea.__init__(self)
         self.chart = chart
-        self.ctrl = ctrl
         self.hoverItem = None
         #self.setMinimumWidth(250)
         #self.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding))
@@ -885,7 +880,6 @@ class FlowchartWidget(dockarea.DockArea):
             item = items[0]
             if hasattr(item, 'node') and isinstance(item.node, Node):
                 n = item.node
-                self.ctrl.select(n)
                 data = {'outputs': n.outputValues(), 'inputs': n.inputValues()}
                 self.selNameLabel.setText(n.name())
                 if hasattr(n, 'nodeName'):
