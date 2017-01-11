@@ -793,7 +793,7 @@ class FlowchartWidget(dockarea.DockArea):
         self.selInfoLayout.addWidget(self.selectedTree)
         self.selDock = dockarea.Dock('Selected Node', size=(1000,200))
         self.selDock.addWidget(self.selInfo)
-        self.addDock(self.selDock, 'bottom')
+        self.addDock(self.selDock, 'right', self.hoverDock)
         
         self._scene = self.view.scene()
         self._viewBox = self.view.viewBox()

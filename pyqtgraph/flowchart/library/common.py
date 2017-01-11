@@ -18,7 +18,11 @@ def generateUi(opts):
     """Convenience function for generating common UI types"""
     widget = QtGui.QWidget()
     l = QtGui.QFormLayout()
-    l.setSpacing(0)
+    l.setRowWrapPolicy(QtGui.QFormLayout.WrapAllRows);
+    l.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow);
+    # l.setFormAlignment(Qt::AlignHCenter | Qt::AlignTop);
+    # l.setLabelAlignment(Qt::AlignLeft);
+    # l.setSpacing(0)
     widget.setLayout(l)
     ctrls = {}
     row = 0
