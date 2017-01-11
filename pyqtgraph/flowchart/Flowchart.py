@@ -486,8 +486,6 @@ class Flowchart(Node):
                     print(self._nodes[n1].terminals)
                     print(self._nodes[n2].terminals)
                     printExc("Error connecting terminals %s.%s - %s.%s:" % (n1, t1, n2, t2))
-                    
-                
         finally:
             self.blockSignals(False)
             
