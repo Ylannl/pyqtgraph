@@ -772,13 +772,16 @@ class FlowchartWidget(dockarea.DockArea):
         self.viewDock.addWidget(self.view)
         self.viewDock.hideTitleBar()
         self.addDock(self.viewDock)
-    
+
+        # add dock for displaying ctrls of selected node
+        self.selCtrlDock = dockarea.Dock('Node Controls', size = (1000,200), widget=None)
+        self.addDock(self.selCtrlDock, 'bottom')
 
         self.hoverText = QtGui.QTextEdit()
         self.hoverText.setReadOnly(True)
         self.hoverDock = dockarea.Dock('Hover Info', size=(1000,20))
         self.hoverDock.addWidget(self.hoverText)
-        self.addDock(self.hoverDock, 'bottom')
+        self.addDock(self.hoverDock, 'right', self.selCtrlDock)
 
         self.selInfo = QtGui.QWidget()
         self.selInfoLayout = QtGui.QGridLayout()
@@ -791,9 +794,9 @@ class FlowchartWidget(dockarea.DockArea):
         #self.selInfoLayout.addWidget(self.selNameLabel)
         self.selInfoLayout.addWidget(self.selDescLabel)
         self.selInfoLayout.addWidget(self.selectedTree)
-        self.selDock = dockarea.Dock('Selected Node', size=(1000,200))
+        self.selDock = dockarea.Dock('Node Inspector', size=(1000,200))
         self.selDock.addWidget(self.selInfo)
-        self.addDock(self.selDock, 'right', self.hoverDock)
+        self.addDock(self.selDock, 'above', self.hoverDock)
         
         self._scene = self.view.scene()
         self._viewBox = self.view.viewBox()
@@ -872,6 +875,10 @@ class FlowchartWidget(dockarea.DockArea):
         #print "FlowchartWidget.selectionChanged called."
         items = self._scene.selectedItems()
         #print "     scene.selectedItems: ", items
+
+
+
+        n = None
         if len(items) == 0:
             data = None
         else:
@@ -886,8 +893,22 @@ class FlowchartWidget(dockarea.DockArea):
                     self.selDescLabel.setText("")
                 if n.exception is not None:
                     data['exception'] = n.exception
+
+                # clear widget in selCtrlLayout
+                litem = self.selCtrlDock.layout.takeAt(0)
+                if litem != None:
+                    litem.widget().close()
+                    del litem
+                # set widget in selCtrlDock
+                w = n.ctrlWidget()
+                if w:
+                    w.show()
+                    self.selCtrlDock.addWidget(w, 0, 0)
             else:
                 data = None
+        
+        # if not n is None:
+
         self.selectedTree.setData(data, hideRoot=True)
 
     def hoverOver(self, items):
