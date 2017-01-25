@@ -781,7 +781,7 @@ class FlowchartWidget(dockarea.DockArea):
         self.hoverText.setReadOnly(True)
         self.hoverDock = dockarea.Dock('Hover Info', size=(1000,20))
         self.hoverDock.addWidget(self.hoverText)
-        self.addDock(self.hoverDock, 'right', self.selCtrlDock)
+        self.addDock(self.hoverDock, 'above', self.selCtrlDock)
 
         self.selInfo = QtGui.QWidget()
         self.selInfoLayout = QtGui.QGridLayout()
@@ -885,7 +885,9 @@ class FlowchartWidget(dockarea.DockArea):
             item = items[0]
             if hasattr(item, 'node') and isinstance(item.node, Node):
                 n = item.node
-                data = {'outputs': n.outputValues(), 'inputs': n.inputValues()}
+                # this slows down interaction with fc, so disabling it for now...
+                data = {}
+                # data = {'outputs': n.outputValues(), 'inputs': n.inputValues()}
                 self.selNameLabel.setText(n.name())
                 if hasattr(n, 'nodeName'):
                     self.selDescLabel.setText("<b>%s</b>: %s" % (n.nodeName, n.__class__.__doc__))
