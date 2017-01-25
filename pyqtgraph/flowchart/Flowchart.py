@@ -776,13 +776,11 @@ class FlowchartWidget(dockarea.DockArea):
 
         # add dock for displaying ctrls of selected node
         self.selCtrlDock = dockarea.Dock('Node Controls', size = (1000,200), widget=None)
-        self.addDock(self.selCtrlDock, 'bottom')
 
         self.hoverText = QtGui.QTextEdit()
         self.hoverText.setReadOnly(True)
-        self.hoverDock = dockarea.Dock('Hover Info', size=(1000,20))
+        self.hoverDock = dockarea.Dock('Hover Info', size=(1000,15))
         self.hoverDock.addWidget(self.hoverText)
-        self.addDock(self.hoverDock, 'above', self.selCtrlDock)
 
         self.selInfo = QtGui.QWidget()
         self.selInfoLayout = QtGui.QGridLayout()
@@ -797,7 +795,11 @@ class FlowchartWidget(dockarea.DockArea):
         self.selInfoLayout.addWidget(self.selectedTree)
         self.selDock = dockarea.Dock('Node Inspector', size=(1000,200))
         self.selDock.addWidget(self.selInfo)
-        self.addDock(self.selDock, 'above', self.hoverDock)
+
+        self.addDock(self.selDock, 'bottom')
+        self.addDock(self.selCtrlDock, 'above', self.selDock)
+        self.addDock(self.hoverDock, 'bottom')
+        
         
         self._scene = self.view.scene()
         self._viewBox = self.view.viewBox()
