@@ -7,6 +7,7 @@ from ...WidgetGroup import WidgetGroup
 from ..Node import Node
 import numpy as np
 from ...widgets.ColorButton import ColorButton
+from ...widgets.GradientWidget import GradientWidget
 try:
     import metaarray
     HAVE_METAARRAY = True
@@ -63,6 +64,8 @@ def generateUi(opts):
                 w.addItem(i)
         #elif t == 'colormap':
             #w = ColorMapper()
+        elif t == 'gradient':
+            w = GradientWidget()
         elif t == 'color':
             w = ColorButton()
         else:
