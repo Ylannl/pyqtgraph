@@ -504,11 +504,12 @@ class ConnectionItem(GraphicsObject):
         if self.style['shape'] == 'line':
             path.lineTo(stop)
         elif self.style['shape'] == 'cubic':
-            dx = 50.0
+            dx = 75.0
+            dx *= abs(stop.x() - start.x())/100
+            dx = min(dx, 160)
+            dx = max(dx, 40)
             if not forward:
-                dx = -50.0
-            if stop.x() < start.x():
-                dx *= 3
+                dx *= -1
             path.cubicTo(Point(start.x()+dx, start.y()), Point(stop.x()-dx, stop.y()), Point(stop.x(), stop.y()))
         else:
             raise Exception('Invalid shape "%s"; options are "line" or "cubic"' % self.style['shape'])
