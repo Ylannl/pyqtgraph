@@ -27,6 +27,15 @@ try:
     import __builtin__ as builtins
 except ImportError:
     import builtins
+
+try:
+    from builtins import reload as builtinreload #py < 3.0
+except ImportError:
+    try:
+        from importlib import reload as builtinreload # py 3.4+
+    except ImportError: # py 3.0-3.3
+        from imp import reload as builtinreload
+
 from .debug import printExc
 
 def reloadAll(prefix=None, debug=False):
@@ -79,7 +88,7 @@ def reload(module, debug=False, lists=False, dicts=False):
         
     ## make a copy of the old module dictionary, reload, then grab the new module dictionary for comparison
     oldDict = module.__dict__.copy()
-    builtins.reload(module)
+    builtinreload(module)
     newDict = module.__dict__
     
     ## Allow modules access to the old dictionary after they reload

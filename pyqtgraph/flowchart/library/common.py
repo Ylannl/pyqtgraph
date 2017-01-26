@@ -3,7 +3,7 @@ from ...Qt import QtCore, QtGui
 from ...widgets.SpinBox import SpinBox
 #from ...SignalProxy import SignalProxy
 from ...WidgetGroup import WidgetGroup
-#from ColorMapper import ColorMapper
+from ...widgets.ColorMapWidget import ColorMapWidget
 from ..Node import Node
 import numpy as np
 from ...widgets.ColorButton import ColorButton
@@ -62,8 +62,9 @@ def generateUi(opts):
             w = QtGui.QComboBox()
             for i in o['values']:
                 w.addItem(i)
-        #elif t == 'colormap':
-            #w = ColorMapper()
+        elif t == 'colormap':
+            w = ColorMapWidget()
+            w.setFields(o['fields'])
         elif t == 'gradient':
             w = GradientWidget()
         elif t == 'color':
