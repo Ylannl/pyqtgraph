@@ -88,10 +88,13 @@ class PlotWidgetNode(Node):
         
     def ctrlWidget(self):
         if self.ui is None:
-            self.ui = ComboBox()
-            self.ui.currentIndexChanged.connect(self.plotSelected)
-            self.updateUi()
+            self.createUi()
+        self.updateUi()
         return self.ui
+
+    def createUi(self):
+        self.ui = ComboBox()
+        self.ui.currentIndexChanged.connect(self.plotSelected)
     
     def plotSelected(self, index):
         self.setPlot(self.ui.value())
@@ -104,6 +107,8 @@ class PlotWidgetNode(Node):
         *plots* must be a dictionary of {name: plot} pairs.
         """
         self.plots = plots
+        if self.ui is None:
+            self.createUi()
         self.updateUi()
     
     def updateUi(self):
@@ -182,8 +187,35 @@ class PlotCurve(CtrlNode):
         
         self.item.setData(x, y, pen=self.ctrls['color'].color())
         return {'plot': self.item}
-        
-        
+
+
+class PlotHistogram(CtrlNode):
+    """Generates a plot curve from x/y data"""
+    nodeName = 'PlotHistogram'
+    uiTemplate = [
+        ('color', 'color'),
+        ('nBins', 'intSpin', {'min':10, 'max':500, 'value':50, })
+    ]
+    
+    def __init__(self, name):
+        CtrlNode.__init__(self, name, terminals={
+            'dataIn': {'io': 'in'},
+            'plot': {'io': 'out'}
+        })
+        self.item = PlotDataItem(stepMode=True, fillLevel=0, pen={'width': 2})
+    
+    def process(self, dataIn, display=True):
+        #print "scatterplot process"
+        if not display:
+            return {'plot': None}
+        if dataIn.ndim>1:
+            d = dataIn[:,2]
+        else:
+            d = dataIn
+        nBins = self.ctrls['nBins'].value()
+        y,x = np.histogram(d, bins=nBins)
+        self.item.setData(x, y, pen=self.ctrls['color'].color())
+        return {'plot': self.item}
 
 
 class ScatterPlot(CtrlNode):
