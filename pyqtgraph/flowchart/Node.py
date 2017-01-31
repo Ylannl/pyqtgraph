@@ -7,6 +7,8 @@ from ..pgcollections import OrderedDict
 from ..debug import *
 import numpy as np
 
+from time import time
+
 
 def strDict(d):
     return dict([(str(k), v) for k, v in d.items()])
@@ -297,10 +299,12 @@ class Node(QtCore.QObject):
         vals = self.inputValues()
         #print "  inputs:", vals
         try:
+            t0 = time()
             if self.isBypassed():
                 out = self.processBypassed(vals)
             else:
                 out = self.process(**strDict(vals))
+            print("updated node {node.name} in {d}s".format(node=self, d=time()-t0))
             #print "  output:", out
             if out is not None:
                 if signal:

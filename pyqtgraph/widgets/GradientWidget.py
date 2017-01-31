@@ -66,6 +66,9 @@ class GradientWidget(GraphicsView):
         else:
             self.setFixedWidth(mx)
             self.setMaximumHeight(16777215)
+
+    def widgetGroupInterface(self):
+        return (self.sigGradientChanged, self.item.saveState, self.item.restoreState)
         
     def __getattr__(self, attr):
         ### wrap methods from GradientEditorItem
