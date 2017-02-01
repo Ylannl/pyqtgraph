@@ -27,6 +27,8 @@ class Node(QtCore.QObject):
 
     Optionally, a node class can implement the ctrlWidget() method, which must return a QWidget (usually containing other widgets) that will be displayed in the flowchart control panel. Some nodes implement fairly complex control widgets, but most nodes follow a simple form-like pattern: a list of parameter names and a single value (represented as spin box, check box, etc..) for each parameter. To make this easier, the CtrlNode subclass allows you to instead define a simple data structure that CtrlNode will use to automatically generate the control widget.     """
     
+    sigUpdate = QtCore.Signal(object)   # self
+
     sigOutputChanged = QtCore.Signal(object)   # self
     sigClosed = QtCore.Signal(object)
     sigRenamed = QtCore.Signal(object, object)
@@ -296,6 +298,41 @@ class Node(QtCore.QObject):
         (such as when the user interacts with the Node's control widget). Update
         is automatically called when the inputs to the node are changed.
         """
+        self.sigUpdate.emit(self)
+        # vals = self.inputValues()
+        # #print "  inputs:", vals
+        # try:
+        #     t0 = time()
+        #     if self.isBypassed():
+        #         out = self.processBypassed(vals)
+        #     else:
+        #         out = self.process(**strDict(vals))
+        #     print("updated node {node.name} in {d}s".format(node=self, d=time()-t0))
+        #     #print "  output:", out
+        #     if out is not None:
+        #         if signal:
+        #             self.setOutput(**out)
+        #         else:
+        #             self.setOutputNoSignal(**out)
+        #     for n,t in self.inputs().items():
+        #         t.setValueAcceptable(True)
+        #     self.clearException()
+        # except:
+        #     #printExc( "Exception while processing %s:" % self.name())
+        #     for n,t in self.outputs().items():
+        #         t.setValue(None)
+        #     self.setException(sys.exc_info())
+            
+        #     if signal:
+        #         #self.emit(QtCore.SIGNAL('outputChanged'), self)  ## triggers flowchart to propagate new data
+        #         self.sigOutputChanged.emit(self)  ## triggers flowchart to propagate new data
+
+    def old_update(self, signal=True):
+        """Collect all input values, attempt to process new output values, and propagate downstream.
+        Subclasses should call update() whenever thir internal state has changed
+        (such as when the user interacts with the Node's control widget). Update
+        is automatically called when the inputs to the node are changed.
+        """
         vals = self.inputValues()
         #print "  inputs:", vals
         try:
@@ -342,15 +379,16 @@ class Node(QtCore.QObject):
         #self.emit(QtCore.SIGNAL('outputChanged'), self)  ## triggers flowchart to propagate new data
         self.sigOutputChanged.emit(self)  ## triggers flowchart to propagate new data
 
-    def setOutputNoSignal(self, **vals):
+    def setOutputNoSignal(self, propagate=False, **vals):
         for k, v in vals.items():
             term = self.outputs()[k]
             term.setValue(v)
-            #targets = term.connections()
-            #for t in targets:  ## propagate downstream
-                #if t is term:
-                    #continue
-                #t.inputChanged(term)
+            if propagate:
+                targets = term.connections().keys()
+                for t in targets:  ## propagate downstream
+                    # if t is term:
+                    #     continue
+                    t.inputChanged(term, process=False)
             term.setValueAcceptable(True)
 
     def setException(self, exc):

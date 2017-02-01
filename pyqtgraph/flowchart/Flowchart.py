@@ -26,6 +26,8 @@ from . import FlowchartGraphicsView
 from .. import functions as fn
 from ..python2_3 import asUnicode
 
+from .FlowchartProcessor import FlowchartProcessor
+
 def strDict(d):
     return dict([(str(k), v) for k, v in d.items()])
 
@@ -191,7 +193,8 @@ class Flowchart(Node):
         self._nodes[name] = node
         node.sigClosed.connect(self.nodeClosed)
         node.sigRenamed.connect(self.nodeRenamed)
-        node.sigOutputChanged.connect(self.nodeOutputChanged)
+        # node.sigOutputChanged.connect(self.nodeOutputChanged)
+        node.sigUpdate.connect(self.nodeUpdate)
         self.sigChartChanged.emit(self, 'add', node)
         
     def removeNode(self, node):
@@ -354,6 +357,39 @@ class Flowchart(Node):
             ops.insert(i, ('d', t))
         return ops
         
+
+    def finishUpdate(self):
+        self.processing = False
+        print('finished update...')
+    def nodeUpdate(self, startNode):
+        if self.processing:
+            return
+        self.processing = True
+
+        # if not hasattr(self, 'updateThread'):
+        self.updateThread = QtCore.QThread()
+        self.fp = FlowchartProcessor()
+        self.fp.moveToThread(self.updateThread)
+        self.updateThread.started.connect(self.fp.process)
+        self.fp.sigFinished.connect(self.finishUpdate)
+        self.fp.sigFinished.connect(self.updateThread.quit)
+        self.fp.sigFinished.connect(self.fp.deleteLater)
+        self.updateThread.finished.connect(self.updateThread.deleteLater)
+            #error handling?
+
+        ## first collect list of nodes/terminals and their dependencies
+        deps = {}
+        for name, node in self._nodes.items():
+            deps[node] = []
+            for t in node.outputs().values():
+                deps[node].extend(t.dependentNodes())
+        order = fn.toposort(deps, nodes=[startNode])
+        order.reverse()
+        self.fp.setNodeList(order)
+
+        print('started update...')
+        self.updateThread.start()
+
         
     def nodeOutputChanged(self, startNode):
         """Triggered when a node's output values have changed. (NOT called during process())
