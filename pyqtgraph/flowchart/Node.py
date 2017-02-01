@@ -251,6 +251,7 @@ class Node(QtCore.QObject):
         self._bypass = byp
         if self.bypassButton is not None:
             self.bypassButton.setChecked(byp)
+        self.recolor()
         self.update()
         
     def isBypassed(self):
@@ -399,7 +400,9 @@ class Node(QtCore.QObject):
         self.setException(None)
         
     def recolor(self):
-        if self.exception is None:
+        if self.isBypassed():
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 150, 0),3))
+        elif self.exception is None:
             self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
         else:
             self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 0, 0), 3))
