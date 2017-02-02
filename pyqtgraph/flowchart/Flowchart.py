@@ -26,7 +26,7 @@ from . import FlowchartGraphicsView
 from .. import functions as fn
 from ..python2_3 import asUnicode
 
-from .FlowchartProcessor import FlowchartProcessor
+from .FlowchartProcessor import FlowchartProcessorController
 
 def strDict(d):
     return dict([(str(k), v) for k, v in d.items()])
@@ -37,7 +37,6 @@ def strDict(d):
 class Flowchart(Node):
     sigFileLoaded = QtCore.Signal(object)
     sigFileSaved = QtCore.Signal(object)
-    
     
     #sigOutputChanged = QtCore.Signal() ## inherited from Node
     sigChartLoaded = QtCore.Signal()
@@ -83,6 +82,8 @@ class Flowchart(Node):
             
         for name, opts in terminals.items():
             self.addTerminal(name, **opts)
+
+        self.updateController = FlowchartProcessorController()
       
     def setLibrary(self, lib):
         self.library = lib
@@ -357,28 +358,7 @@ class Flowchart(Node):
             ops.insert(i, ('d', t))
         return ops
         
-
-    def finishUpdate(self):
-        self.processing = False
-        print('finished update...')
     def nodeUpdate(self, startNode):
-        if self.processing:
-            print('skipping update of ',startNode)
-            return
-        self.processing = True
-
-        # if not hasattr(self, 'updateThread'):
-        self.updateThread = QtCore.QThread()
-        self.fp = FlowchartProcessor()
-        self.fp.moveToThread(self.updateThread)
-        self.updateThread.started.connect(self.fp.process)
-        self.fp.sigFinished.connect(self.finishUpdate)
-        self.fp.sigFinished.connect(self.updateThread.quit)
-        self.fp.sigFinished.connect(self.fp.deleteLater)
-        self.updateThread.finished.connect(self.updateThread.deleteLater)
-            #error handling?
-
-        ## first collect list of nodes/terminals and their dependencies
         deps = {}
         for name, node in self._nodes.items():
             deps[node] = []
@@ -386,11 +366,7 @@ class Flowchart(Node):
                 deps[node].extend(t.dependentNodes())
         order = fn.toposort(deps, nodes=[startNode])
         order.reverse()
-        self.fp.setNodeList(order)
-
-        print('started update...')
-        self.updateThread.start()
-
+        self.updateController.addNodes(order)       
         
     def nodeOutputChanged(self, startNode):
         """Triggered when a node's output values have changed. (NOT called during process())

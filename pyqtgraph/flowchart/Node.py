@@ -81,6 +81,8 @@ class Node(QtCore.QObject):
         for name, opts in terminals.items():
             self.addTerminal(name, **opts)
 
+        self.setStatus("init")
+
         
     def nextTerminalName(self, name):
         """Return an unused terminal name"""
@@ -398,6 +400,21 @@ class Node(QtCore.QObject):
         
     def clearException(self):
         self.setException(None)
+
+    def setStatus(self, status, **kwargs):
+        # exc for an Exception
+        if status == 'init':
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 150), 3))
+        elif status == 'processing':
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 150, 0), 3))
+        elif status == 'exception':
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 0, 0), 3))
+            self.exception = kwargs['exc']
+        elif status == 'processed':
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
+            self.exception = None
+        else:
+            raise KeyError("I don't know this status key: {}".format(status))
         
     def recolor(self):
         if self.isBypassed():
@@ -674,6 +691,7 @@ class NodeGraphicsItem(GraphicsObject):
     def buildMenu(self):
         self.menu = QtGui.QMenu()
         self.menu.setTitle("Node")
+        a = self.menu.addAction("Update node", self.node.update)
         a = self.menu.addAction("Add input", self.addInputFromMenu)
         if not self.node._allowAddInput:
             a.setEnabled(False)
