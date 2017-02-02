@@ -10,16 +10,16 @@ class FlowchartProcessor(QObject):
 
 	def process(self):
 		print(self.nodeList)
-		try: 
-			for node in self.nodeList:
+		
+		for node in self.nodeList:
+			try: 
 				print("processing", node)
 				ins = node.inputValues()
 				outs = node.process(**ins)
 				if not outs is None:
 					node.setOutputNoSignal(propagate=True, **outs)
 				print("finished processing", node)
-		except Exception as e:
-			print(node, e)
-			traceback.print_tb(sys.exc_info()[-1])
-		finally:
-			self.sigFinished.emit()
+			except Exception as e:
+				node.setException(sys.exc_info())
+		
+		self.sigFinished.emit()

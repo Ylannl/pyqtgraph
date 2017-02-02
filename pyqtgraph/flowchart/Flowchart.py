@@ -363,6 +363,7 @@ class Flowchart(Node):
         print('finished update...')
     def nodeUpdate(self, startNode):
         if self.processing:
+            print('skipping update of ',startNode)
             return
         self.processing = True
 
