@@ -28,6 +28,7 @@ class Node(QtCore.QObject):
     Optionally, a node class can implement the ctrlWidget() method, which must return a QWidget (usually containing other widgets) that will be displayed in the flowchart control panel. Some nodes implement fairly complex control widgets, but most nodes follow a simple form-like pattern: a list of parameter names and a single value (represented as spin box, check box, etc..) for each parameter. To make this easier, the CtrlNode subclass allows you to instead define a simple data structure that CtrlNode will use to automatically generate the control widget.     """
     
     sigUpdate = QtCore.Signal(object)   # self
+    sigReColor = QtCore.Signal(object)
 
     sigOutputChanged = QtCore.Signal(object)   # self
     sigClosed = QtCore.Signal(object)
@@ -82,6 +83,7 @@ class Node(QtCore.QObject):
             self.addTerminal(name, **opts)
 
         self.setStatus("init")
+        self.sigReColor.connect(self.setStatus)
 
         
     def nextTerminalName(self, name):
@@ -253,7 +255,7 @@ class Node(QtCore.QObject):
         self._bypass = byp
         if self.bypassButton is not None:
             self.bypassButton.setChecked(byp)
-        self.recolor()
+        self.sigReColor.emit('bypassed')
         self.update()
         
     def isBypassed(self):
@@ -396,7 +398,7 @@ class Node(QtCore.QObject):
 
     def setException(self, exc):
         self.exception = exc
-        self.recolor()
+        # self.recolor()
         
     def clearException(self):
         self.setException(None)
@@ -409,20 +411,20 @@ class Node(QtCore.QObject):
             self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 150, 0), 3))
         elif status == 'exception':
             self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 0, 0), 3))
-            self.exception = kwargs['exc']
         elif status == 'processed':
             self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
-            self.exception = None
+        elif status == 'bypassed':
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 150, 0),3))
         else:
             raise KeyError("I don't know this status key: {}".format(status))
         
-    def recolor(self):
-        if self.isBypassed():
-            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 150, 0),3))
-        elif self.exception is None:
-            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
-        else:
-            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 0, 0), 3))
+    # def recolor(self):
+    #     if self.isBypassed():
+    #         self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 150, 0),3))
+    #     elif self.exception is None:
+    #         self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
+    #     else:
+    #         self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 0, 0), 3))
 
     def saveState(self):
         """Return a dictionary representing the current state of this node

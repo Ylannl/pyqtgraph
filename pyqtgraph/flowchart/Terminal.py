@@ -6,7 +6,10 @@ from .. import functions as fn
 from ..Point import Point
 
 
-class Terminal(object):
+class Terminal(QtCore.QObject):
+
+    sigReColor = QtCore.Signal()
+
     def __init__(self, node, name, io, optional=False, multi=False, pos=None, renamable=False, removable=False, multiable=False, bypass=None):
         """
         Construct a new terminal. 
@@ -27,6 +30,7 @@ class Terminal(object):
                         when the Node is in bypass mode.
         ==============  =================================================================================
         """
+        QtCore.QObject.__init__(self)
         self._io = io
         self._optional = optional
         self._multi = multi
@@ -45,7 +49,9 @@ class Terminal(object):
             self._value = None  
         
         self.valueOk = None
-        self.recolor()
+
+        self.sigReColor.connect(self.recolor)
+        self.sigReColor.emit()
         
     def value(self, term=None):
         """Return the value this terminal provides for the connected terminal"""
@@ -77,7 +83,7 @@ class Terminal(object):
         if self.isInput() and process:
             self.node().update()
             
-        self.recolor()
+        self.sigReColor.emit()
         
     def setOpts(self, **opts):
         self._renamable = opts.get('renamable', self._renamable)
@@ -118,7 +124,7 @@ class Terminal(object):
         
     def setValueAcceptable(self, v=True):
         self.valueOk = v
-        self.recolor()
+        self.sigReColor.emit()
         
     def connections(self):
         return self._connections
@@ -201,7 +207,7 @@ class Terminal(object):
         self._connections[term] = connectionItem
         term._connections[self] = connectionItem
         
-        self.recolor()
+        self.sigReColor.emit()
         
         self.connected(term)
         term.connected(self)
@@ -215,8 +221,8 @@ class Terminal(object):
         item.close()
         del self._connections[term]
         del term._connections[self]
-        self.recolor()
-        term.recolor()
+        self.sigReColor.emit()
+        term.sigReColor.emit()
         
         self.disconnected(term)
         term.disconnected(self)
