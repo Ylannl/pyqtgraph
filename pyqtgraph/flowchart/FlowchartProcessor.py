@@ -9,7 +9,7 @@ class FlowchartProcessor(QtCore.QObject):
 		# print("added node to queue", nodes)
 
 	def process(self):
-		print('starting process()', self.nodeList)
+		# print('starting process()', self.nodeList)
 
 		for node in self.nodeList:
 			try: 

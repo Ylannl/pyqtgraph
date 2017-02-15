@@ -229,7 +229,8 @@ class EvalNode(Node):
         try:  
             text = str(self.text.toPlainText()).replace('\n', ' ')
             output = eval(text, globals(), l)
-        except SyntaxError:
+        except SyntaxError as exc:
+            # print("SYNTAXERROR!!", exc.text)
             fn = "def fn(**args):\n"
             run = "\noutput=fn(**args)\n"
             text = fn + "\n".join(["    "+l for l in str(self.text.toPlainText()).split('\n')]) + run

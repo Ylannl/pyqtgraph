@@ -13,6 +13,7 @@ class PlotWidgetNode(Node):
     """Connection to PlotWidget. Will plot arrays, metaarrays, and display event lists."""
     nodeName = 'PlotWidget'
     sigPlotChanged = QtCore.Signal(object)
+    sigUpdatePlot = QtCore.Signal(object, object)
     
     def __init__(self, name):
         Node.__init__(self, name, terminals={'In': {'io': 'in', 'multi': True}})
@@ -20,6 +21,7 @@ class PlotWidgetNode(Node):
         self.plots = {}   # list of available plots user may select from
         self.ui = None 
         self.items = {}
+        self.sigUpdatePlot.connect(self.updatePlot)
         
     def disconnected(self, localTerm, remoteTerm):
         if localTerm is self['In'] and remoteTerm in self.items:
@@ -45,7 +47,7 @@ class PlotWidgetNode(Node):
     def getPlot(self):
         return self.plot
         
-    def process(self, In, display=True):
+    def updatePlot(self, In, display):
         if display and self.plot is not None:
             items = set()
             # Add all new input items to selected plot
@@ -78,6 +80,9 @@ class PlotWidgetNode(Node):
                 if vid not in items:
                     self.plot.removeItem(self.items[vid])
                     del self.items[vid]
+
+    def process(self, In, display=True):
+        self.sigUpdatePlot.emit(In, display)
             
     def processBypassed(self, args):
         if self.plot is None:

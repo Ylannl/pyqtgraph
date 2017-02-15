@@ -69,6 +69,10 @@ def generateUi(opts):
             w = GradientWidget()
         elif t == 'color':
             w = ColorButton()
+        elif t == 'text':
+            w = QtGui.QLineEdit()
+            if 'text' in o:
+                w.setText('text')
         else:
             raise Exception("Unknown widget type '%s'" % str(t))
         if 'tip' in o:
