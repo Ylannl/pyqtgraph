@@ -84,6 +84,7 @@ class Flowchart(Node):
             self.addTerminal(name, **opts)
 
         self.updateController = FlowchartProcessorController()
+        self.blockNodeUpdate = False
       
     def setLibrary(self, lib):
         self.library = lib
@@ -359,14 +360,15 @@ class Flowchart(Node):
         return ops
         
     def nodeUpdate(self, startNode):
-        deps = {}
-        for name, node in self._nodes.items():
-            deps[node] = []
-            for t in node.outputs().values():
-                deps[node].extend(t.dependentNodes())
-        order = fn.toposort(deps, nodes=[startNode])
-        order.reverse()
-        self.updateController.addNodes(order)       
+        if not self.blockNodeUpdate:
+            deps = {}
+            for name, node in self._nodes.items():
+                deps[node] = []
+                for t in node.outputs().values():
+                    deps[node].extend(t.dependentNodes())
+            order = fn.toposort(deps, nodes=[startNode])
+            order.reverse()
+            self.updateController.addNodes(order)       
         
     def nodeOutputChanged(self, startNode):
         """Triggered when a node's output values have changed. (NOT called during process())
@@ -471,6 +473,7 @@ class Flowchart(Node):
         
     def restoreState(self, state, clear=False):
         self.blockSignals(True)
+        self.blockNodeUpdate = True
         try:
             if clear:
                 self.clear()
@@ -502,7 +505,8 @@ class Flowchart(Node):
                     printExc("Error connecting terminals %s.%s - %s.%s:" % (n1, t1, n2, t2))
         finally:
             self.blockSignals(False)
-            
+            self.blockNodeUpdate = False
+            self.inputNode.update()
         self.sigChartLoaded.emit()
         self.outputChanged()
         self.sigStateChanged.emit()
@@ -772,6 +776,7 @@ class FlowchartWidget(dockarea.DockArea):
     def __init__(self, chart):
         #QtGui.QWidget.__init__(self)
         dockarea.DockArea.__init__(self)
+        self.setWindowTitle("Flowchart")
         self.chart = chart
         self.hoverItem = None
         #self.setMinimumWidth(250)
