@@ -253,9 +253,12 @@ class Node(QtCore.QObject):
         control panel.
         """
         self._bypass = byp
-        if self.bypassButton is not None:
-            self.bypassButton.setChecked(byp)
-        self.sigReColor.emit('bypassed')
+        # if self.bypassButton is not None:
+        #     self.bypassButton.setChecked(byp)
+        if byp:
+            self.sigReColor.emit('bypassed')
+        else:
+            self.sigReColor.emit('init')
         self.update()
         
     def isBypassed(self):
@@ -406,15 +409,15 @@ class Node(QtCore.QObject):
     def setStatus(self, status, **kwargs):
         # exc for an Exception
         if status == 'init':
-            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 150), 3))
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 200), 3))
         elif status == 'processing':
-            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 150, 0), 3))
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(200, 200, 0), 7))
         elif status == 'exception':
-            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 0, 0), 3))
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(200, 0, 0), 3))
         elif status == 'processed':
-            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 200, 0),2))
         elif status == 'bypassed':
-            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 150, 0),3))
+            self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 150, 150),5))
         else:
             raise KeyError("I don't know this status key: {}".format(status))
         
@@ -703,6 +706,12 @@ class NodeGraphicsItem(GraphicsObject):
         a = self.menu.addAction("Remove node", self.node.close)
         if not self.node._allowRemove:
             a.setEnabled(False)
+        a = QtGui.QAction("Bypass node")
+        a = self.menu.addAction("Bypass node")
+        a.setCheckable(True)
+        a.setChecked(self.node.isBypassed())
+        a.triggered.connect(self.node.bypass)
+        # self.menu.addAction(a)
         
     def addInputFromMenu(self):  ## called when add input is clicked in context menu
         self.node.addInput(renamable=True, removable=True, multiable=True)

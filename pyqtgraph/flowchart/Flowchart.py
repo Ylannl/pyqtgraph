@@ -721,25 +721,25 @@ class FlowchartCtrlWidget(QtGui.QWidget):
         self.items[node].setText(0, node.name())
 
     def addNode(self, node):
-        ctrl = node.ctrlWidget()
+        # ctrl = node.ctrlWidget()
         #if ctrl is None:
             #return
-        item = QtGui.QTreeWidgetItem([node.name(), '', ''])
-        self.ui.ctrlList.addTopLevelItem(item)
-        byp = QtGui.QPushButton('X')
-        byp.setCheckable(True)
-        byp.setFixedWidth(20)
-        item.bypassBtn = byp
-        self.ui.ctrlList.setItemWidget(item, 1, byp)
-        byp.node = node
-        node.bypassButton = byp
-        byp.setChecked(node.isBypassed())
-        byp.clicked.connect(self.bypassClicked)
+        # item = QtGui.QTreeWidgetItem([node.name(), '', ''])
+        # self.ui.ctrlList.addTopLevelItem(item)
+        # byp = QtGui.QPushButton('X')
+        # byp.setCheckable(True)
+        # byp.setFixedWidth(20)
+        # item.bypassBtn = byp
+        # self.ui.ctrlList.setItemWidget(item, 1, byp)
+        # byp.node = node
+        # node.bypassButton = byp
+        # byp.setChecked(node.isBypassed())
+        # byp.clicked.connect(self.bypassClicked)
         
-        if ctrl is not None:
-            item2 = QtGui.QTreeWidgetItem()
-            item.addChild(item2)
-            self.ui.ctrlList.setItemWidget(item2, 0, ctrl)
+        # if ctrl is not None:
+        #     item2 = QtGui.QTreeWidgetItem()
+        #     item.addChild(item2)
+        #     self.ui.ctrlList.setItemWidget(item2, 0, ctrl)
             
         self.items[node] = item
         
