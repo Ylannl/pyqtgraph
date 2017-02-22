@@ -15,18 +15,18 @@ class FlowchartProcessor(QtCore.QObject):
 			try: 
 				if not node.isBypassed():
 					node.sigReColor.emit('processing')
-					print("processing", node)
+					# print("processing", node)
 					ins = node.inputValues()
 					outs = node.process(**ins)
 					if not outs is None:
 						node.setOutputNoSignal(propagate=True, **outs)
-					print("finished processing", node)
+					# print("finished processing", node)
 					node.clearException()
 					node.sigReColor.emit('processed')
 			except Exception as e:
 				node.setException(sys.exc_info())
 				node.sigReColor.emit('exception')
-				traceback.print_exc()
+				# traceback.print_exc()
 		
 		self.sigFinished.emit()
 		# print (self.nodeQueue)

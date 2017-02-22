@@ -8,13 +8,13 @@ from .. import FileDialog, DataTreeWidget
 ## pyside and pyqt use incompatible ui files.
 if USE_PYSIDE:
     from . import FlowchartTemplate_pyside as FlowchartTemplate
-    from . import FlowchartCtrlTemplate_pyside as FlowchartCtrlTemplate
+    # from . import FlowchartCtrlTemplate_pyside as FlowchartCtrlTemplate
 elif USE_PYQT5:
     from . import FlowchartTemplate_pyqt5 as FlowchartTemplate
-    from . import FlowchartCtrlTemplate_pyqt5 as FlowchartCtrlTemplate
+    # # from . import FlowchartCtrlTemplate_pyqt5 as FlowchartCtrlTemplate
 else:
     from . import FlowchartTemplate_pyqt as FlowchartTemplate
-    from . import FlowchartCtrlTemplate_pyqt as FlowchartCtrlTemplate
+    # from . import FlowchartCtrlTemplate_pyqt as FlowchartCtrlTemplate
     
 from .Terminal import Terminal
 from numpy import ndarray
@@ -616,13 +616,13 @@ class FlowchartCtrlWidget(QtGui.QWidget):
         self.currentFileName = None
         QtGui.QWidget.__init__(self)
         self.chart = chart
-        self.ui = FlowchartCtrlTemplate.Ui_Form()
-        self.ui.setupUi(self)
-        self.ui.ctrlList.setColumnCount(2)
-        #self.ui.ctrlList.setColumnWidth(0, 200)
-        self.ui.ctrlList.setColumnWidth(1, 20)
-        self.ui.ctrlList.setVerticalScrollMode(self.ui.ctrlList.ScrollPerPixel)
-        self.ui.ctrlList.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        # self.ui = FlowchartCtrlTemplate.Ui_Form()
+        # self.ui.setupUi(self)
+        # self.ui.ctrlList.setColumnCount(2)
+        self.ui.ctrlList.setColumnWidth(0, 200)
+        # self.ui.ctrlList.setColumnWidth(1, 20)
+        # # self.ui.ctrlList.setVerticalScrollMode(self.ui.ctrlList.ScrollPerPixel)
+        # self.ui.ctrlList.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         
         self.chartWidget = FlowchartWidget(chart, self)
         #self.chartWidget.viewBox().autoRange()
@@ -631,19 +631,19 @@ class FlowchartCtrlWidget(QtGui.QWidget):
         self.cwWin.setCentralWidget(self.chartWidget)
         self.cwWin.resize(1000,800)
         
-        h = self.ui.ctrlList.header()
+        # h = self.ui.ctrlList.header()
         if not USE_PYQT5:
             h.setResizeMode(0, h.Stretch)
         else:
             h.setSectionResizeMode(0, h.Stretch)
         
-        self.ui.ctrlList.itemChanged.connect(self.itemChanged)
-        self.ui.loadBtn.clicked.connect(self.loadClicked)
-        self.ui.saveBtn.clicked.connect(self.saveClicked)
-        self.ui.saveAsBtn.clicked.connect(self.saveAsClicked)
-        self.ui.showChartBtn.toggled.connect(self.chartToggled)
+        # self.ui.ctrlList.itemChanged.connect(self.itemChanged)
+        # self.ui.loadBtn.clicked.connect(self.loadClicked)
+        # self.ui.saveBtn.clicked.connect(self.saveClicked)
+        # self.ui.saveAsBtn.clicked.connect(self.saveAsClicked)
+        # self.ui.showChartBtn.toggled.connect(self.chartToggled)
         self.chart.sigFileLoaded.connect(self.setCurrentFile)
-        self.ui.reloadBtn.clicked.connect(self.reloadClicked)
+        # self.ui.reloadBtn.clicked.connect(self.reloadClicked)
         self.chart.sigFileSaved.connect(self.fileSaved)
         
     
@@ -661,9 +661,9 @@ class FlowchartCtrlWidget(QtGui.QWidget):
     def reloadClicked(self):
         try:
             self.chartWidget.reloadLibrary()
-            self.ui.reloadBtn.success("Reloaded.")
+            # self.ui.reloadBtn.success("Reloaded.")
         except:
-            self.ui.reloadBtn.success("Error.")
+            # self.ui.reloadBtn.success("Error.")
             raise
             
             
@@ -678,13 +678,13 @@ class FlowchartCtrlWidget(QtGui.QWidget):
     def saveClicked(self):
         if self.currentFileName is None:
             self.saveAsClicked()
-        else:
-            try:
-                self.chart.saveFile(self.currentFileName)
-                #self.ui.saveBtn.success("Saved.")
-            except:
-                self.ui.saveBtn.failure("Error")
-                raise
+        # else:
+        #     try:
+        #         self.chart.saveFile(self.currentFileName)
+        #         #self.ui.saveBtn.success("Saved.")
+        #     except:
+        #         self.ui.saveBtn.failure("Error")
+        #         raise
         
     def saveAsClicked(self):
         try:
@@ -702,10 +702,10 @@ class FlowchartCtrlWidget(QtGui.QWidget):
             
     def setCurrentFile(self, fileName):
         self.currentFileName = asUnicode(fileName)
-        if fileName is None:
-            self.ui.fileNameLabel.setText("<b>[ new ]</b>")
-        else:
-            self.ui.fileNameLabel.setText("<b>%s</b>" % os.path.split(self.currentFileName)[1])
+        # if fileName is None:
+        #     self.ui.fileNameLabel.setText("<b>[ new ]</b>")
+        # else:
+        #     self.ui.fileNameLabel.setText("<b>%s</b>" % os.path.split(self.currentFileName)[1])
         self.resizeEvent(None)
 
     def itemChanged(self, *args):
@@ -747,11 +747,11 @@ class FlowchartCtrlWidget(QtGui.QWidget):
         if node in self.items:
             item = self.items[node]
             #self.disconnect(item.bypassBtn, QtCore.SIGNAL('clicked()'), self.bypassClicked)
-            try:
-                item.bypassBtn.clicked.disconnect(self.bypassClicked)
-            except (TypeError, RuntimeError):
-                pass
-            self.ui.ctrlList.removeTopLevelItem(item)
+            # try:
+                # item.bypassBtn.clicked.disconnect(self.bypassClicked)
+            # except (TypeError, RuntimeError):
+            #     pass
+            # self.ui.ctrlList.removeTopLevelItem(item)
             
     def bypassClicked(self):
         btn = QtCore.QObject.sender(self)
@@ -769,7 +769,7 @@ class FlowchartCtrlWidget(QtGui.QWidget):
         
     def select(self, node):
         item = self.items[node]
-        self.ui.ctrlList.setCurrentItem(item)
+        # self.ui.ctrlList.setCurrentItem(item)
 
 class FlowchartWidget(dockarea.DockArea):
     """Includes the actual graphical flowchart and debugging interface"""
