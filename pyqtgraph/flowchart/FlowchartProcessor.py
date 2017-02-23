@@ -10,23 +10,29 @@ class FlowchartProcessor(QtCore.QObject):
 
 	def process(self):
 		# print('starting process()', self.nodeList)
-
 		for node in self.nodeList:
 			try: 
+				node.sigReColor.emit('processing')
+				# print("processing", node)
+				ins = node.inputValues()
 				if not node.isBypassed():
-					node.sigReColor.emit('processing')
-					# print("processing", node)
-					ins = node.inputValues()
 					outs = node.process(**ins)
-					if not outs is None:
-						node.setOutputNoSignal(propagate=True, **outs)
-					# print("finished processing", node)
-					node.clearException()
 					node.sigReColor.emit('processed')
+				else:
+					outs = node.processBypassed(ins)
+					node.sigReColor.emit('bypassed')
+				# print("setting outs", outs)
+				# print("finished processing", node)
+				node.clearException()
 			except Exception as e:
 				node.setException(sys.exc_info())
 				node.sigReColor.emit('exception')
 				# traceback.print_exc()
+				outs = node.processBypassed(ins)
+			finally:
+				if not outs is None:
+					node.setOutputNoSignal(propagate=True, **outs)
+				
 		
 		self.sigFinished.emit()
 		# print (self.nodeQueue)

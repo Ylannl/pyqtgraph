@@ -418,8 +418,8 @@ class Node(QtCore.QObject):
             self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(0, 200, 0),2))
         elif status == 'bypassed':
             self.graphicsItem().setPen(QtGui.QPen(QtGui.QColor(150, 150, 150),5))
-        else:
-            raise KeyError("I don't know this status key: {}".format(status))
+        # else:
+        #     raise KeyError("I don't know this status key: {}".format(status))
         
     # def recolor(self):
     #     if self.isBypassed():
@@ -451,7 +451,9 @@ class Node(QtCore.QObject):
         by saveState(). """
         pos = state.get('pos', (0,0))
         self.graphicsItem().setPos(*pos)
-        self.bypass(state.get('bypass', False))
+        bp = state.get('bypass', False)
+        self.bypass(bp)
+        self.graphicsItem().actionBypass.setChecked(bp)
         if 'terminals' in state:
             self.restoreTerminals(state['terminals'])
 
@@ -711,6 +713,7 @@ class NodeGraphicsItem(GraphicsObject):
         a.setCheckable(True)
         a.setChecked(self.node.isBypassed())
         a.triggered.connect(self.node.bypass)
+        self.actionBypass = a
         # self.menu.addAction(a)
         
     def addInputFromMenu(self):  ## called when add input is clicked in context menu
